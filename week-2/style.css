@@ -1,2 +1,24 @@
 html,body{
+	margin:0;
+	padding:0;
+}
+
+.module{
+	min-height: 600px;
+}
+
+.axis .domain{
+	display: none;
+}
+
+.axis .domain{
+	display: none;
+}
+
+.chart{
+	width:400px;
+	height: 300px;
+	margin:20px;
+	float: left;
+/*	background: black;*/
 }
