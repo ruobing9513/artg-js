@@ -46,9 +46,11 @@ Promise.all([
 			}
 
 			return d;
+
 		});
 		
-		// console.log(migrationAugmented);
+		console.log(migrationAugmented);
+		
 		// //migration filtered to get all the data coming out of USA with code of 840
 		// const migrationFiltered = migrationAugmented
 		// 	.filter(function(d){
@@ -100,10 +102,10 @@ Promise.all([
 				.append('div')
 				.attr('class','chart')
 				.each(function(d){
-					console.group();
-					console.log(this); //dom
-					console.log(d); //data 
-					console.groupEnd();
+					// console.group();
+					// console.log(this); //dom
+					// console.log(d); //data 
+					// console.groupEnd();
 
 				lineChart(d.values, this)
 				});
@@ -151,13 +153,13 @@ function lineChart(data,rootDOM){
 	       .append('svg')
 	       .attr('width', W)
 	       .attr('height', H);
-	   const plot = svg.append('g')
+	   const plot = svg.append('g') //group 
 	       .attr('class','plot')
-	       .attr('transform', `translate(${margin.l}, ${margin.t})`);
+	       .attr('transform', `translate(${margin.l}, ${margin.t})`); //${} - replace the whole thing within the symbol into numbers
 
 	   plot.append('path')
 	       .attr('class','line')
-	       .datum(data)
+	       .datum(data)//join the data 
 	       //some visual shape i.e. geometry, "d"
 	       .attr('d', data => lineGenerator(data))
 	       .style('fill','none')
