@@ -39,7 +39,7 @@ function lineChart(data, rootDOM){
 		.attr('height', H);
 	const plot = svg.append('g')
 		.attr('class','plot')
-		.attr('transform', `translate(${margin.l}, ${margin.t})`);
+		.attr('transform', `translate(${margin.l}, ${margin.t})`); //set the position by using the numbers and attr of x
 
 	plot.append('path')
 		.attr('class','line')
