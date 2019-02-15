@@ -1,9 +1,9 @@
 import * as d3 from 'd3';
 
-function LineChart(maxY){
-	function exportFunction(data, rootDOM){
+function LineChart(){
+	let maxY;
 
-		let maxY;
+	function exportFunction(data, rootDOM){
 
 		//data
 		//[{}, {}, {}...]x7
@@ -67,7 +67,6 @@ function LineChart(maxY){
 
 		plotEnter.append('path')
 			.attr('class','line')
-			.datum(data)
 			//some visual shape i.e. geometry, "d"
 			.style('fill','none')
 			.style('stroke','#333')
@@ -75,7 +74,6 @@ function LineChart(maxY){
 
 		plotEnter.append('path')
 			.attr('class','area')
-			.datum(data)
 			.style('fill-opacity',0.03)
 
 		plotEnter.append('g')
@@ -112,10 +110,10 @@ function LineChart(maxY){
 
 	}
 
-		// exportFunction.maxY = function(_){
-		// 		maxY = _;
-		// 		return this; 
-		// }
+		exportFunction.maxY = function(_){
+				maxY = _;
+				return this; 
+		}
 
 		return exportFunction;
 }
