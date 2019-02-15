@@ -1,5 +1,6 @@
 import './style.css';
-import {select} from 'd3';
+import 'bootstrap/dist/css/bootstrap.css';
+import {select, max, dispatch} from 'd3';
 
 import {
 	migrationDataPromise,
@@ -10,9 +11,23 @@ import {
 	groupBySubregionByYear
 } from './utils';
 
-import {max} from 'd3'; 
-import LineChart from './viewModules/lineChart';
-import 'bootstrap/dist/css/bootstrap.css';
+//View modules
+import Composition from './viewModules/Composition';
+import LineChart from './viewModules/LineChart';
+
+//CREATE A DISPATCH OBJECT 
+const globalDispatch = dispatch('change:country');
+
+//Build UI for countryTitle component
+const title = select('.country-view')
+	.insert('h1', '.composition-container')
+	.html('World');
+
+//REACTING TO THE CHANGE:COUNTRY EVENT, AND SUBSCRIBERS ARE HERE 
+globalDispatch.on('change:country', (code, display, migrationData)=>{
+	title.html(display)
+	renderLineCharts(groupBySubregionByYear(code, migrationData))
+})
 
 Promise.all([
 		migrationDataPromise,
@@ -43,20 +58,16 @@ Promise.all([
 		return d;
 	});
 	
-	//Migration from the US (840) to any other place in the world
-	//filter the larger migration dataset to only the subset coming from the US
-	const data = groupBySubregionByYear("840", migrationAugmented);
+	//Render the view modules
+	globalDispatch.call('change:country', null, '840', 'World', migrationAugmented);
+	// renderComposition(migrationAugmented.filter(d => d.origin_code === "840"));
 
-	//Render the charts
-	render(data);
 
 	//Build UI for <select> menu
 	const countryList = Array.from(countryCode.entries());
-	
 	const menu = select('.nav')
 		.append('select')
-		.attr('class', 'form-control-sm')
-
+		.attr('class','form-control form-control-sm');
 	menu.selectAll('option')
 		.data(countryList)
 		.enter()
@@ -66,31 +77,27 @@ Promise.all([
 
 	//Define behavior for <select> menu
 	menu.on('change', function(){
-
 		const code = this.value; //3-digit code
 		const idx = this.selectedIndex;
 		const display = this.options[idx].innerHTML;
 
-		const data = groupBySubregionByYear(code, migrationAugmented);
-		render(data);
+	//BROADCASTING THE MESSAGE TO THE COMPONENTS 
 
+	globalDispatch.call('change:country', null, code, display, migrationAugmented);
+		
 	});
-
 
 });
 
-function render(data){
-	//find MAX value for Y-scale
-	console.log(data);
+function renderLineCharts(data){
 
-	const maxValue = max(data.map(subregion => max(subregion.values, d=> d.value))) //array of 18 
-	// console.log(maxValue);
-
-	// const lineChart = LineChart(maxValue);
+	//Find max value in data
+	const maxValue = max( data.map(subregion => max(subregion.values, d => d.value)) ) //[]x18
 
 	const lineChart = LineChart()
-		.maxY(maxValue);
-	
+		.maxY(maxValue)
+		.on('year:change', year => console.log(year));
+
 	const charts = select('.chart-container')
 		.selectAll('.chart')
 		.data(data, d => d.key);
@@ -106,4 +113,13 @@ function render(data){
 				this
 			);
 		});
+}
+
+function renderComposition(data){
+
+	select('.composition-container')
+		.each(function(){
+			Composition(this, data)
+		});
+
 }

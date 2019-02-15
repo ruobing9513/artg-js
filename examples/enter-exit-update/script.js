@@ -77,47 +77,48 @@ function updatePlot1(data){
 }
 
 function updatePlot2(data){
-	const nodes = plot2.selectAll('.node')
-		.data(data, d=>d.name); //ALWAYS HAS TO BE AN ARRAY, NOW THERE IS NO DATA - WHICH IS A DEFICIENT 
+
+	console.group('Update plot 2');
+	//YOUR CODE HERE
+	const nodes = plot2.selectAll('.node') //selection of size of 0
+		.data(data, d => d.name); //update selection
 
 	const nodesEnter = nodes.enter()
 		.append('g')
-		.attr('class','node'); //important
+		.attr('class','node');
+
+	const nodesCombined = nodes.merge(nodesEnter);
 
 	const nodesExit = nodes.exit();
 
-	nodes.select('circle') //update 
-		.attr('fill', 'green')
-	nodesExit.select('circle') //surplus 
-		.attr('fill','red')
-		// .remove()
-	nodesEnter.select('cicle') //new data 
-		.attr('fill','yellow')
+	//nodes selection size?
+	nodes.select('circle')
+		.attr('fill', 'green');
 
-	console.groupEnd();
-	
+	nodesExit.select('circle')
+		.attr('fill', 'red');
+
 	nodesEnter
 		.append('circle')
-		.attr('fill', 'yellow')
-
+		.attr('fill','yellow');
 	nodes.merge(nodesEnter)
-		.select('circle') //append 
+		.select('circle')
 		.transition()
-		.attr('r', d=>d.value);
+		.attr('r', d => d.value)
 
-	nodesEnter //nodes
-		.append('text') 
-		.attr('text-anchor', 'middle');
-
+	nodesEnter
+		.append('text')
+		.attr('text-anchor', 'middle')
 	nodes.merge(nodesEnter)
 		.select('text')
-		.text(d=>d.name)
+		.text(d => d.name)
 
 	nodes.merge(nodesEnter)
 		.transition()
-		.attr('transform', d => `translate(${d.x}, ${d.y})`)
+		.attr('transform', d => `translate(${d.x}, ${d.y})`);
 
-	
+
+	console.groupEnd();
 
 }
 

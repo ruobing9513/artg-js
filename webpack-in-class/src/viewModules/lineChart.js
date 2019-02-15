@@ -1,12 +1,14 @@
 import * as d3 from 'd3';
 
+//FACTORY FUNCTION PRODUCES A NEW PRODUCT ON THE CONFIGURATION (IN THIS CASE, THE Y AXIS)
+
 function LineChart(){
+
 	let maxY;
 
-	function exportFunction(data, rootDOM){
+	const bisect = d3.bisector(d=>d.key).right;
 
-		//data
-		//[{}, {}, {}...]x7
+	function exportFunction(data, rootDOM){
 
 		const W = rootDOM.clientWidth;
 		const H = rootDOM.clientHeight;
@@ -34,88 +36,103 @@ function LineChart(){
 			.scale(scaleY)
 			.tickSize(-innerWidth)
 			.ticks(3)
+
 		const svg = d3.select(rootDOM)
 			.classed('line-chart',true)
 			.selectAll('svg')
-			.data([1]);
-
+			.data([1])
 		const svgEnter = svg.enter()
 			.append('svg');
-
 		svg.merge(svgEnter)
 			.attr('width', W)
 			.attr('height', H);
 
-
-		// const svg = d3.select(rootDOM) 
-		// //rootDOM=this=.div EVERY TIME WHEN WE SELECT A NEW COUNTRY, 
-		// //IT'S APPENDING A NEW SVG ON TOP OF IT 
-		// //--WE WANT TO APPEND ONCE AND ONLY ONCE 
-		// 	.classed('line-chart',true)
-		// 	.append('svg')
-		// 	.attr('width', W)
-		// 	.attr('height', H);
-
-		//APPEND THE REST OF DOM STRUCTURE 
+		//Append rest of DOM structure in the enter selection
 		const plotEnter = svgEnter.append('g')
 			.attr('class','plot')
 			.attr('transform', `translate(${margin.l}, ${margin.t})`);
-
-		// const plot = svg.append('g')
-		// 	.attr('class','plot')
-		// 	.attr('transform', `translate(${margin.l}, ${margin.t})`); //remove here after the above
-
 		plotEnter.append('path')
 			.attr('class','line')
-			//some visual shape i.e. geometry, "d"
 			.style('fill','none')
 			.style('stroke','#333')
 			.style('stroke-width','2px')
-
 		plotEnter.append('path')
 			.attr('class','area')
 			.style('fill-opacity',0.03)
-
 		plotEnter.append('g')
 			.attr('class','axis axis-x')
 			.attr('transform',`translate(0, ${innerHeight})`)
-
 		plotEnter.append('g')
 			.attr('class','axis axis-y')
 
-		//UPDATING DATA 
+		const tooltipEnter = plotEnter.append('g')
+			.attr('class','tool-tip')
 
+		tooltipEnter.append('circle').attr('r', 3)
+		tooltipEnter.append('text').attr('text-anchor','middle')
+			.style('opacity', 0)
+
+
+		plotEnter.append('rect')
+			.attr('class', 'mouse-target')
+			.attr('width', innerWidth)
+			.attr('height', innerHeight)
+			.style('fill-opacity', 0.1)
+
+
+
+		//Update the update + enter selections
 		const plot = svg.merge(svgEnter).select('.plot');
 
 		plot.select('.line')
-			.datum(data) 
-			//binding taking an Array to a single Dom-element (datum) 
-			//data: element to element
-			.transition() 
-			//ANYTHING HAPPEN NEXT BECOME ANIMATION 
+			.datum(data)
+			.transition()
 			.attr('d', data => lineGenerator(data))
-
 		plot.select('.area')
 			.datum(data)
 			.transition()
 			.attr('d', data => areaGenerator(data))
-
 		plot.select('.axis-x')
 			.transition()
 			.call(axisX)
-
 		plot.select('.axis-y')
 			.transition()
 			.call(axisY);
 
+		//TOOLTIP EVENT 
+		plot
+			.select('.mouse-target')
+			.on('mouseenter', function(d){
+				plot.select('.tool-tip')
+				.style('opacity', 1)
+			})
+			.on('mousemove', function(d){
+				const mouse = d3.mouse(this);
+				const mouseX = mouse[0];
+				const year = scaleX.invert(mouseX)
+
+				const idx = bisect(data,year);
+				const datum = data(idx);
+
+				plot.select('.tool-tip')
+				.attr('transform', `translate(${scaleX(datum.key)}, ${scaleY(datum.value)})`);
+
+
+			})
+			.on('mouseleave',function(d){
+				plot.select('.tool-tip')
+				.style('opacity',0)
+			});
+
 	}
 
-		exportFunction.maxY = function(_){
-				maxY = _;
-				return this; 
-		}
+	exportFunction.maxY = function(_){
+		maxY = _;
+		return this;
+	}
 
-		return exportFunction;
+	return exportFunction;
+
 }
 
 
