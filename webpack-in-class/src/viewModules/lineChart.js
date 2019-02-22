@@ -1,12 +1,10 @@
 import * as d3 from 'd3';
 
-//FACTORY FUNCTION PRODUCES A NEW PRODUCT ON THE CONFIGURATION (IN THIS CASE, THE Y AXIS)
-
 function LineChart(){
 
 	let maxY;
-
-	const bisect = d3.bisector(d=>d.key).right;
+	const bisect = d3.bisector(d => d.key).right; //this will give us a function
+	let cb;
 
 	function exportFunction(data, rootDOM){
 
@@ -41,6 +39,7 @@ function LineChart(){
 			.classed('line-chart',true)
 			.selectAll('svg')
 			.data([1])
+			
 		const svgEnter = svg.enter()
 			.append('svg');
 		svg.merge(svgEnter)
@@ -67,19 +66,16 @@ function LineChart(){
 
 		const tooltipEnter = plotEnter.append('g')
 			.attr('class','tool-tip')
-
-		tooltipEnter.append('circle').attr('r', 3)
+			
+		tooltipEnter.append('circle').attr('r',3)
 		tooltipEnter.append('text').attr('text-anchor','middle')
-			.style('opacity', 0)
-
-
+			.attr('dy', -10)
+			
 		plotEnter.append('rect')
-			.attr('class', 'mouse-target')
+			.attr('class','mouse-target')
 			.attr('width', innerWidth)
 			.attr('height', innerHeight)
-			.style('fill-opacity', 0.1)
-
-
+			.style('opacity', 0.01)
 
 		//Update the update + enter selections
 		const plot = svg.merge(svgEnter).select('.plot');
@@ -99,35 +95,42 @@ function LineChart(){
 			.transition()
 			.call(axisY);
 
-		//TOOLTIP EVENT 
+		//Event handling
 		plot
 			.select('.mouse-target')
 			.on('mouseenter', function(d){
 				plot.select('.tool-tip')
-				.style('opacity', 1)
+					.style('opacity',1)
 			})
 			.on('mousemove', function(d){
 				const mouse = d3.mouse(this);
 				const mouseX = mouse[0];
-				const year = scaleX.invert(mouseX)
-
-				const idx = bisect(data,year);
-				const datum = data(idx);
+				const year = scaleX.invert(mouseX);
+				
+				const idx = bisect(data, year);
+				const datum = data[idx];
 
 				plot.select('.tool-tip')
-				.attr('transform', `translate(${scaleX(datum.key)}, ${scaleY(datum.value)})`);
+					.attr('transform', `translate(${scaleX(datum.key)}, ${scaleY(datum.value)})`)
+					.select('text')
+					.text(datum.value);
 
-
+				cb(datum.key);
 			})
-			.on('mouseleave',function(d){
+			.on('mouseleave', function(d){
 				plot.select('.tool-tip')
-				.style('opacity',0)
+					.style('opacity',0)
 			});
 
 	}
 
 	exportFunction.maxY = function(_){
 		maxY = _;
+		return this;
+	}
+
+	exportFunction.on = function(event, callback){
+		cb = callback;
 		return this;
 	}
 

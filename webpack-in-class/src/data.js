@@ -17,9 +17,13 @@ const metadataPromise = csv('./data/country-metadata.csv', parseMetadata)
 			return [a.iso_num, a]
 		});
 		const metadataMap = new Map(metadata_tmp);
+		console.log(metadataMap);
 
 		return metadataMap;
-	});
+	})
+	;
+	
+
 
 export {
 	migrationDataPromise,

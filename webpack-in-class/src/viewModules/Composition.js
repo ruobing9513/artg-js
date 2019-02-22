@@ -24,6 +24,8 @@ export default function Composition(rootDOM, data){
 		.entries(data)
 		.map(d => [+d.key, d.values]);
 	dataByYear = new Map(dataByYear);
+
+	// console.log(dataByYear);
 	//-- Convert to a treemap structure
 	let treemapData = {
 		key:'root',
@@ -49,14 +51,20 @@ export default function Composition(rootDOM, data){
 		.data(treemapData.descendants().filter(d => d.height < 2), d => d.data.key);
 	const nodesEnter = nodes.enter()
 		.append('g').attr('class','node');
-	nodesEnter.append('rect');
-	nodesEnter.append('text');
+	nodesEnter.append('rect')
+		.style('background', 'blue');
+	nodesEnter.append('text')
+		.style('font-size', '12px')
+		.style('fill', 'red')
+		.attr('text-anchor', 'middle')
+	
 	const nodesCombined = nodes.merge(nodesEnter);
+	
 	nodesCombined
 		.attr('transform', d => `translate(${d.x0}, ${d.y0})`)
 		.select('rect')
-		.attr('width', d => d.x1 - d.x0)
-		.attr('height', d => d.y1 - d.y0);
+		.attr('width', d => d.x1 - d.x0 + 10)
+		.attr('height', d => d.y1 - d.y0 + 10);
 	nodesCombined
 		.select('text')
 		.text(d => d.data.key);
@@ -65,4 +73,12 @@ export default function Composition(rootDOM, data){
 		.style('fill','none')
 		.style('stroke','#ccc')
 		.style('stroke-width','1px')
+
+	// const nodesMap = nodes.merge(nodesCombined).selectAll('.node');
+
+	// nodesMap.select('.rect')	
+	// 	.datum(data)
+	// 	.transition()
+	// 	.attr()
+
 }
