@@ -4,7 +4,7 @@ function LineChart(){
 
 	let maxY;
 	const bisect = d3.bisector(d => d.key).right; //this will give us a function
-	let yearChangeCallBack;
+	let yearChangeCallback;
 
 	function exportFunction(data, rootDOM, key){
 
@@ -125,9 +125,7 @@ function LineChart(){
 					.select('text')
 					.text(datum.value);
 
-				console.log(datum);
-
-				yearChangeCallBack(datum.key);
+				yearChangeCallback(datum.key);
 
 			})
 			.on('mouseleave', function(d){
@@ -143,8 +141,9 @@ function LineChart(){
 	}
 
 	exportFunction.onChangeYear = function(callback){
-		//EVENT = YEAR:CHANGE CALLBACK = GLOBAL DISPATCH --> LOG OUT THE YEAR
-		yearChangeCallBack = callback;		//ARGUMENT IN --> CONSOLE.LOG (ARGUMENT OUT) WHATEVER FUNCTION WE ENETER
+		//event ==> "year:change"
+		//callback ==> arg => console.log(arg)
+		yearChangeCallback = callback; //arg => console.log(arg)
 		return this;
 	}
 

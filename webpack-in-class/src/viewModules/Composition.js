@@ -1,6 +1,7 @@
 import {nest, hierarchy, treemap, select} from 'd3';
 
 export default function Composition(){
+
 	let year = 2017;
 
 	function exportFunction(rootDOM, data){
@@ -25,11 +26,12 @@ export default function Composition(){
 			.key(d => d.dest_subregion)
 			.entries(data)
 			.map(d => [+d.key, d.values]);
+		console.log(dataByYear);
 		dataByYear = new Map(dataByYear);
 		//-- Convert to a treemap structure
 		let treemapData = {
 			key:'root',
-			values:dataByYear.get(YEAR)
+			values:dataByYear.get(year)
 		};
 		//-- Convert to hierarchy structure
 		treemapData = hierarchy(treemapData, d => d.values);
@@ -86,12 +88,13 @@ export default function Composition(){
 		nodesCombined.filter(d => d.depth ===2 )
 			.select('rect')
 			.style('fill-opacity', .2)
+	}
 
-		}
-		exportFunction.year = function(_){
-			year = _;
-			return this; 
-		}
+	exportFunction.year = function(_){
+		year = _;
+		return this;
+	}
+
 
 	return exportFunction;
 }
