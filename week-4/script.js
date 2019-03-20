@@ -56,18 +56,21 @@ Promise.all([
 			.enter()
 			.append('div')
 			.attr('class','chart')
-			.each(function(d){
-				console.group()
-				console.log(this);
-				console.log(d);
-				console.groupEnd();
+			// .each(function(d){
+			// 	console.group()
+			// 	console.log(this);
+			// 	console.log(d);
+			// 	console.groupEnd();
 
-				lineChart(
-					d.values, //array of 7
-					this
-				);
-			})
+			// 	lineChart(
+			// 		d.values, //array of 7
+			// 		this
+			// 	);
+			// })
 
+		console.log(metadata);
+		console.log(migrationAugmented); 
+		console.log(subregionsData);
 
 	})
 

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scatterplot d3v4</title>
+  <style type="text/css">
+    body{
+      margin: 100;
+      font-family: arial, sans;
+    }
+
+    .label{
+      font-size: 15px;
+    }
+    img{
+      width: 100px;
+      height: 100px;
+    }
+
+    .legend text,
+    .axis text {
+      font-size: 13px;
+      fill: #333;
+    }
+
+    .axis path,
+    .axis line{
+      fill: none;
+      stroke-width: 1px;
+      stroke: #777;
+    }
+
+    .legend rect{
+      fill-opacity: 0.75;
+    }
+
+    .legeng:hover rect{
+      fill-opacity:1;
+    }
+  </style>
+  <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+
+  <h1 style="text-align: left">Sportify top 100 tracks</h1>
+
+
+<script type="text/javascript">
+  const margin = {top: 60, right: 60, bottom: 60, left: 60},
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  const svg = d3.select('body')
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+  const x = d3.scaleLinear()
+    .domain( [0, 100] )
+    .range( [margin.left, width + margin.right ] );
+
+  const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+  const xScale = d3.scaleLinear()
+    .range([0, width]);
+
+  const yScale = d3.scaleLinear()
+    .range([height, 0]);
+
+  // square root scale.
+  const radius = d3.scaleSqrt()
+    .range([5,20]);
+
+  const xAxis = d3.axisBottom()
+    .scale(xScale);
+
+  const yAxis = d3.axisLeft()
+    .scale(yScale);
+
+  const xValue = function(d) { return d.ranking;}, // data -> value
+      // xScale = d3.scaleLinear().range([0, width]), // value -> display
+      xMap = function(d) { return xScale(xValue(d));};
+
+  const yValue = function(d) { return d.appearance;}, // data -> value
+      // yScale = d3.scaleLinear().range([height, 0]), // value -> display
+      yMap = function(d) { return yScale(yValue(d));};
+
+  // again scaleOrdinal
+
+  d3.csv('music_2018.csv', function(error, data){
+    data.forEach(function(d){
+      d.ranking = +d.ranking;
+      // d.Year = +d.Year;
+      d.appearance = +d.appearance;
+    });
+
+    const menu = d3.select(".nav")
+        .append("select");
+
+        //I CAN'T LOG OUT 'YEAR', AND NAV SHOWS AS '0' AND NO MENU SHOWS UP ON THE PAGE 
+        menu.selectAll("option")
+            .data(data)
+            .enter()
+            .append("option")
+            .attr("value", d => d.year)
+            .html(d=> d.year);
+
+        menu.on("change", function(){
+
+            const year = this.value;
+
+            const data = transform(year,track);
+            
+            render(data)
+
+         })
+
+    const nodes = data.map(function(node, index) {
+      return {
+        index: index,
+        // name: node.name,
+        ranking: node.ranking,
+        x: x(node.ranking),
+        fx: x(node.ranking),
+      };
+    });
+
+    xScale.domain(d3.extent(data, function(d){
+      return d.ranking;
+    })).nice();
+
+    yScale.domain(d3.extent(data, function(d){
+      return d.appearance;
+    })).nice();
+
+    const simulation = d3.forceSimulation(nodes)
+      .force("x", d3.forceX(width/2))
+      .force("y", d3.forceY(height/2))
+      .force("collide", d3.forceCollide().radius(20))
+      // .force("manyBody", d3.forceManyBody().strength(-10))
+      .stop();
+
+      // set back
+
+    // adding axes is also simpler now, just translate x-axis to (0,height) and it's alread defined to be a bottom axis. 
+    svg.append('g')
+      .attr('transform', 'translate(0,' + height + ')')
+      .attr('class', 'x axis');
+      // .call(xAxis);
+
+    // y-axis is translated to (0,0)
+    svg.append('g')
+      .attr('transform', 'translate(0,0)')
+      .attr('class', 'y axis')
+      .attr('opacity', 0)
+      .call(yAxis);
+
+
+    const bubble = svg.selectAll('.bubble')
+        .data(data)
+
+    .enter().append('circle')
+      .attr('class', 'bubble')
+      .attr('cx', xMap)
+      .attr('cy', yMap)
+      .attr('r', 0)
+      .attr('fill-opacity', 0.8);
+
+    bubble
+    .transition()
+
+    .duration(500)
+    .attr('cx', xMap)
+    .attr('cy', yMap)
+    .attr('r', function(d){return d.appearance*5})
+    // .attr('r', 5)
+    .attr('fill-opacity', 0.8)
+    .attr('fill', 'white')
+    .style('stroke','black')
+    .style('stroke-width',2);
+
+    bubble  
+    .on("mouseover", function(d){
+        tooltip.transition()
+              .duration(200)
+              .style('opacity',0.9);
+        tooltip
+              .html(d.name + " - " + d.artists + "<br/>" + "ranking:" + d.ranking
+                +"<br/>" + "<img src='"+d.track_image+"'/>")
+              .style("left", d3.select(this).attr("cx") + "px")
+              .style("top", d3.select(this).attr("cy") + "px");      
+    })
+
+    .on("mouseout", function(d){
+        tooltip.transition()
+             .duration(500)
+             .style("opacity", 0);
+    });
+
+
+    // bubble.append('title')
+    //   .attr('x', function(d){ return radius(d.appearance); })
+    //   .text(function(d){
+    //     return d.ranking;
+    //   });
+
+    // adding label. For x-axis, it's at (10, 10), and for y-axis at (width, height-10).
+    svg.append('text')
+      .attr('x', 10)
+      .attr('y', 10)
+      .attr('class', 'label');
+
+    svg.append('text')
+      .attr('x', width)
+      .attr('y', height)
+      .attr('text-anchor', 'end')
+      .attr('class', 'label');
+
+    const images = bubble.append("svg:image")
+            .attr("xlink:href",  function(d) { return d.image_url;})
+            .attr("x", function(d) { return -25;})
+            .attr("y", function(d) { return -25;})
+            .attr("height", 50)
+            .attr("width", 50);
+    const setEvents = images
+            .on( 'mouseenter', function() {
+              // select element in current context
+              d3.select( this )
+                .transition()
+                .attr("x", function(d) { return -60;})
+                .attr("y", function(d) { return -60;})
+                .attr("height", 100)
+                .attr("width", 100);
+            })
+            // set back
+            .on( 'mouseleave', function() {
+              d3.select( this )
+                .transition()
+                .attr("x", function(d) { return -25;})
+                .attr("y", function(d) { return -25;})
+                .attr("height", 50)
+                .attr("width", 50);
+            });
+      
+
+  });
+
+</script>
+  
+</body>
+</html>

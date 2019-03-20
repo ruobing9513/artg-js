@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<!-- <link href='./style.css' rel='stylesheet' /> -->
+		<style>
+			body{
+				font-family: sans-serif;
+			}
+			img{
+			  width: 100px;
+			  height: 100px;
+			}
+			.tooltip{
+				margin-left: 800px;
+				margin-top: -50px;
+			}
+/*			.plot-1{
+				text-align: center;
+				display: inline-block;
+			}*/
+		</style> 
+	</head>
+	<body>
+		<h1 style="text-align: center">What kind of songs/artist are more likely to make it on <br>top 100 among Sportify users?</h1>
+		<p style="text-align: center">Analysis on artist genres, audio features and artist popularity</p>
+		<p style="text-align: center">What are those top 100 songs on Sportify from 2010 - 2018? </p>
+		<p style="text-align: center">Do people's taste of music change over the year? (audio feature)</p>
+		<p style="text-align: center">Who are those pop singers make it to the top 100 most often and what common features do they have? artistinfo</p>
+
+		<div class='main'>
+			<div class="nav" style='margin-left: 100px'></div>
+			<div class="plot"></div>
+			<div class="plot-1"></div>
+			<div class="tooltip"></div>
+		</div>
+		<script src='lib/d3/d3.min.js'></script>
+		<script src='./script.js'></script>
+		<!-- <script src='./bubble.js'></script> -->
+	</body>
+</html>
