@@ -48,8 +48,6 @@ Promise.all([
 		});
 		console.log(musicAugmented);
 
-		// const musicFiltered = musicAugmented.filter(d => d.origin_code === "840");
-
 		const yearData = d3.nest()
 			.key(d => d.year)
 			// .rollup(values => d3.sum(values, d => d.value))
@@ -78,7 +76,8 @@ Promise.all([
          })
 
 		const charts = d3.select('.main')
-			.selectAll('.plot-1') //0 
+			.selectAll('.plot-1')
+			.attr('class','chart') 
 			.data(yearData)
 			.enter()
 
@@ -115,8 +114,13 @@ function scatterPlot(data, rootDOM){
 		const xScale = d3.scaleLinear().range([0, width]).domain([0,100]);
 		const yScale = d3.scaleLinear().range([height, 0]).domain([0,5]);
 
-		// const xAxis = d3.axisBottom().scale(xScale);
-		// const yAxis = d3.axisLeft().scale(yScale);
+		const xValue = function(d) { return d.ranking;}, // data -> value
+		    // xScale = d3.scaleLinear().range([0, width]), // value -> display
+		    xMap = function(d) { return xScale(xValue(d));};
+
+		const yValue = function(d) { return d.artist_popularity;}, // data -> value
+		    // yScale = d3.scaleLinear().range([height, 0]), // value -> display
+		    yMap = function(d) { return yScale(yValue(d));};
 
 		//UPDATE SELECTION 
 		const plot1 = d3.select('.plot-1')
@@ -153,7 +157,7 @@ function scatterPlot(data, rootDOM){
 		const nodesEnter = nodes.enter()
 			.append('g')
 			.attr('class', 'node')
-			.attr('transform', d => `translate(${d.ranking}, ${d.tempo})`);//change later, test
+			.attr('transform', d => `translate(${d.ranking}, ${d.popularity})`);//change later, test
 
 		nodesEnter.append('circle')
 			// .style('stroke','black')
@@ -174,9 +178,9 @@ function scatterPlot(data, rootDOM){
 		          .style('opacity',1);
 		    tooltip
 		    	//TRACK IMAGE AND RANKING DOESNT MATCH WITH THE TRACK AND ARTIST 
-		          // .html(d.track_name + " - " + d.artist + "<br/>" + "Ranking:" + d.ranking
-		          //   +"<br/>" + "<img src='"+d.track_image+"'/>"); 
-		         .html(d.track_name + " - " + d.artist); 
+		          .html(d.track_name + " - " + d.artist + "<br/>" + "Ranking:" + d.ranking
+		            +"<br/>" + "<img src='"+d.track_image+"'/>"); 
+		         // .text(d.track_name + " - " + d.artist); 
 		})
 		.on("mouseout", function(d){
 			d3.select(this)
@@ -222,6 +226,9 @@ function parseTrack(d){
 		artists_id: d.artists_id,
 		artist: d.artists,
 		track_name: d.track_name,
+		follower: +d.follower,
+		genre: d.genre,
+		popularity: +d.popularity,
 		year: +d.year,
 		album: d.Album,
 		track_id: d.track_id,
@@ -236,8 +243,9 @@ function parseTrack(d){
 		valence: +d.valence,
 		tempo: +d.tempo,
 		Preview: d.Preview_url,
-		track_image: d.track_image
-
+		track_image: d.track_image,
+		x: Math.random() * 900,
+    	y: Math.random() * 800
 	}
 }
 
@@ -252,4 +260,12 @@ function parseArtist(d){
 		artists_popularity: +d.artists_popularity
 
 	}
-	}
+}
+
+function transform(year, data){
+	const musicFiltered = data.filter(d => d.year === year);
+
+	return musicFiltered
+
+}
+
