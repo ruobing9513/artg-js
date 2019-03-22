@@ -75,18 +75,16 @@ Promise.all([
 
          })
 
-		const charts = d3.select('.main')
-			.selectAll('.plot-1')
-			.attr('class','chart') 
-			.data(yearData)
-			.enter()
+		const charts = d3.select('.plot-container')
+			.selectAll('.chart')
+			.data(yearData);
 
 			// .append('div')
 			// .attr('class','plot-1')
 
 		const chartsEnter = charts.enter()
 			.append('div')
-			.attr('class','chart')
+			.attr('class','chart');
 
 		charts.exit().remove();
 
@@ -95,6 +93,7 @@ Promise.all([
 				scatterPlot(
 					d.values,
 					this,
+					d.key
 					)
 			});
 
@@ -114,13 +113,13 @@ function scatterPlot(data, rootDOM){
 		const xScale = d3.scaleLinear().range([0, width]).domain([0,100]);
 		const yScale = d3.scaleLinear().range([height, 0]).domain([0,5]);
 
-		const xValue = function(d) { return d.ranking;}, // data -> value
-		    // xScale = d3.scaleLinear().range([0, width]), // value -> display
-		    xMap = function(d) { return xScale(xValue(d));};
+		// const xValue = function(d) { return d.ranking;}, // data -> value
+		//     // xScale = d3.scaleLinear().range([0, width]), // value -> display
+		//     xMap = function(d) { return xScale(xValue(d));};
 
-		const yValue = function(d) { return d.artist_popularity;}, // data -> value
-		    // yScale = d3.scaleLinear().range([height, 0]), // value -> display
-		    yMap = function(d) { return yScale(yValue(d));};
+		// const yValue = function(d) { return d.artist_popularity;}, // data -> value
+		//     // yScale = d3.scaleLinear().range([height, 0]), // value -> display
+		//     yMap = function(d) { return yScale(yValue(d));};
 
 		//UPDATE SELECTION 
 		const plot1 = d3.select('.plot-1')
