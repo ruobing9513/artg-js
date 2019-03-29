@@ -20,28 +20,11 @@ Promise.all([
 
 		const musicAugmented = trackinfo.map(d => {
 
-			const artist_name = artistMap.get(d.artists_name)
+		const artist_name = artistMap.get(d.artists_name)
 
-			d.artists_name = artist_name;
+		d.artists_name = artist_name;
 
-			// const artist_image = artistMap.get(d.artist_image);
 
-			// d.artist_image = artist_image;
-
-			// const artist_followers_total = artistMap.get(d.followers_total);
-			// d.followers_total = artist_followers_total;
-
-			// const artists_popularity = artistMap.get(d.artists_popularity);
-			// d.artists_popularity = artists_popularity;
-
-			// const artist_genre = artistMap.get(d.genres);
-			// d.genres = artist_genre;
-
-			// if (artist_genre){
-			// 	d.artist_genre = artist_genre.genre
-			// }
-
-		
 		return d;
 
 		});
@@ -49,7 +32,15 @@ Promise.all([
 
 		const artistsData = d3.nest()
 			.key(d => d.artists_id)
-			.entries(musicAugmented);
+			// .key(d => d.values.length)
+			.entries(musicAugmented)
+			.map(group => {
+				return {
+					artist: group.key, //converting into numbers
+					appearance: group.values.length
+
+				}
+			});
 
 		console.log(artistsData);
 
@@ -60,86 +51,66 @@ Promise.all([
 			.each(function(d){
 				bubbleChart(
 				d.values,
-				this)
+				this,
+				d.key)
 			});
 
 	})
 
 	function bubbleChart(data, rootDOM){
 
-		const margin = {top: 60, right: 60, bottom: 60, left: 60},
-		width = 940,
-		height = 600;
+		//data
+		//[{}, {}, {}...]x9
 
-		const forceStrength = 0.03;
+			const margin = {top: 60, right: 60, bottom: 60, left: 60},
+			    width = 800 - margin.left - margin.right,
+			    height = 400 - margin.top - margin.bottom;
 
-		function charge(d) {
-		    return -Math.pow(d.radius, 2.0) * forceStrength;
-		  }
-		const center = { x: width / 2, y: height / 2 };
+			const plot2 = d3.select('.plot-2')
+				.append('svg')
+				.attr('width', width)
+				.attr('height', height + 100)
+				.attr("transform","translate(" + margin.left + "," + margin.top + ")")
 
-		const simulation = d3.forceSimulation()
-			.velocityDecay(0.2)
-		    .force('x', d3.forceX().strength(forceStrength).x(center.x))
-		    .force('y', d3.forceY().strength(forceStrength).y(center.y))
-		    .force('charge', d3.forceManyBody().strength(charge))
-		    .on('tick', ticked);
-		simulation.stop();
+			const nodes = plot2.selectAll('.node')
+				.data(data);
 
-		// color setting by YEAR OR GENRE
-		// const dataExtent = d3.extent(artistsData, function(d){
-		// 			return d.popularity;
-		// 		})
-		// console.log(dataExtent);
+			const nodesEnter = nodes.enter()
+				.append('g')
+				.attr('class','node');
 
-		// const fillColor = d3.scaleLinear()
-		// 	.domain(d3.extent(d3.values(data,d=>d.popularity)))
-		// 	.range(["#f9f9f9","#922B21"]);
+			nodesEnter
+				.append('circle')
+				.attr('r', d=>d.appearance)
+				.style('fill-opacity',.1)
+				.style('fill','#red')
+				.style('stroke-width','2px');
+			nodes.merge(nodesEnter)
+					.attr('transform', d => `translate(${d.x}, ${d.y})`);
 
-		const radiusScale = d3.scalePow()
-			.range([1,45])
-			.exponent(0.5)
-			.domain([0,50]);
+			//CREATE FORCE SIMULATION 
 
-		const plot2 = d3.select('.plot-2')
-			// .append('svg')
-			.attr('width', width)
-			.attr('height',height);
+			const simulation = d3.forceSimulation();
 
-		const bubbles = plot2.selectAll('.bubble')
-			.data(data, d=>d.key);
+			const forceX = d3.forceX().x(width/2);
+			const forceY = d3.forceY().y(height/2)
+			const forceCollide = d3.forceCollide().radius(10);
 
-		const bubblesEnter = bubbles.enter()
-			.append('svg')
-			.append('cicrle')
-			.classed('bubble',true)
-			.attr('r',0)
-			// .attr('fill', fillColor)
-			// .attr('stroke', fillColor)
-			.attr('fill', 'black')
-			.attr('stroke', 'red')
-			.style('opacity',1)
-			.attr('stroke-width',2);
-			// .on('mouseover', showDetail)
-			// .on('mouseout',hideDetail)
+			simulation
+				.force('x', forceX)
+				.force('y', forceY)
+				.force('collide', forceCollide)
+				//.force('link', forceLink)
+				.nodes(data) //start the simulation
+				.on('tick', () => {
+					nodes.merge(nodesEnter)
+						.attr('transform', d => `translate(${d.x}, ${d.y})`);
+				})
+				.alpha(1);
 
-		// bubbles = bubbles.merge(bubblesEnter);
-
-		bubblesEnter.transition()
-			.duration(1000)
-			.attr('transform', d=> `translate(${d.x}, ${d.y})`)
-			.attr('r', 10);
-
-		function ticked() {
-		    bubbles
-		      .attr('cx', function (d) { return d.x; })
-		      .attr('cy', function (d) { return d.y; });
-		  };
-
-
+		
 
 	}
-
 	//Utility functions for parsing metadata, migration data, and country code
 	function parseTrack(d){
 		return {
@@ -165,8 +136,8 @@ Promise.all([
 			tempo: +d.tempo,
 			Preview: d.Preview_url,
 			track_image: d.track_image,
-			x: Math.random() * 300,
-        	y: Math.random() * 400
+			x: Math.random() * 200,
+        	y: Math.random() * 200
 
 		}
 	}
