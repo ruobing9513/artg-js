@@ -111,81 +111,65 @@ function scatterPlot(data, rootDOM){
 		const xScale = d3.scaleLinear().range([10, width+150]).domain([0,100]);
 		const yScale = d3.scaleLinear().range([height, 0]).domain([0,150]);
 
-		//UPDATE SELECTION 
-		const plot1 = d3.select('.plot-1')
+		data.forEach(d=>{
+			d.x = xScale(d.ranking);
+			d.y = yScale(d.popularity);
+		});
+
+		const plot2 = d3.select('.plot-2')
 			.append('svg')
-			.attr('width', width + 300)
-			.attr('height', height + 100)
+			.attr('width', width)
+			.attr('height', height)
 			.attr("transform","translate(" + margin.left + "," + margin.top + ")")
 
-		const xAxis = plot1.append("g")
-	       .attr('transform', 'translate(0,' + height + ')') 
-	       .attr("class", "xAxis")
-	       .call(d3.axisBottom()
-	       	.ticks(10)
-	       	// .tickSize(-width)
-	       	.scale(xScale));
+		//TOOLTIP 
 
-	    const tooltip = d3.select('.plot-1').append("div")
-	      .attr("class", "tooltip")
-	      .attr('width', 50)
-	      .style("opacity", 0);
+		const tooltip = d3.select('.plot-1').append("div")
+			.attr("class", "tooltip")
+			.attr('width', 50)
+			.style("opacity", 0);
 
-		//UPDATE SELECTION
-		const nodes = plot1.selectAll('.plot-1')
-			.data(data)
+		//UPDATE SELECTION 
+		const nodes = plot2.selectAll('.node')
+			.data(data);
 
 		nodes.select('circle')
 			.style('fill','black')
-			.attr('r',2)
+			.attr('r',2);
 
-		//ENTER SELECTION 
+		//ENTERING SELECTION 
 		const nodesEnter = nodes.enter()
 			.append('g')
-			.attr('class', 'node')
+			.attr('class','node');
 
 		nodesEnter.append('circle')
-			// .attr('transform', d => `translate(${xScale(d.ranking)} , ${yScale(d.popularity)})`)
-			// .style('fill', 'red')
-			.attr("r", 1)
-			.style('stroke-width',1)
-			.style('stroke','black');
+			.attr('r', d=>d.appearance)
+			.style('fill-opacity',0.9)
+			.style('fill','#FF6347');
 
-		nodesEnter.append('image')
-			.attr('class', 'node_image')
-			.attr("xlink:href", d=>d.track_image);
-			// .attr("x", function(d) { return -25;})
-	  //       .attr("y", function(d) { return -25;});
-
-		//ENTER AND UPDATE SELECTION, MERGE 
+		//ENTERING AND UPDATE
 		nodes.merge(nodesEnter)
-			.attr('cx',0)
-			.attr('cy', d=>yScale(d.popularity))
-			.transition()
-			.attr('transform', d => `translate(${xScale(d.ranking)} , ${yScale(d.popularity)})`);
+			.attr('transform', d => `translate(${d.x}, ${d.y})`);
 
 		nodes.merge(nodesEnter)
 			.select('circle')
 
 			.transition()
-			.duration(2000)
-			.attr('r',7);
-
+			.duration(200)
+			.attr('r', 7)
+		
 		nodes.merge(nodesEnter)
 			.on("mouseenter", function(d){
 				d3.select(this)
 				.style('fill','#FF6347')
-				.attr('r',7)
-				.attr('fill-opacity', .8)
+				.attr('fill-opacity', 1)
 				
 			    tooltip.transition()
 			          .duration(200)
 			          .style('opacity',1)
 			    tooltip
 			    	//TRACK IMAGE AND RANKING DOESNT MATCH WITH THE TRACK AND ARTIST 
-			          .html("<h1>" + "Rank: " + d.ranking + "</h1>" 
-			          	+d.track_name + " - " + d.artists_display + "<br/>" 
-			          	+ "<br/>" + "<img src='"+d.track_image+"'/>"); 
+			          .html("<h1>" + d.artist + "</h1>" ); 
 			})
 
 			.on("mouseout", function(d){
@@ -198,34 +182,32 @@ function scatterPlot(data, rootDOM){
 			    tooltip.transition()
 			         .duration(500)
 			         .style("opacity", 0);
-			});
-
-
-		//EXIT SELECTION 
-		nodes.exit().remove()
+			})
 
 
 		//CREATE FORCE SIMULATION 
 
-		// const simulation = d3.forceSimulation();
+		const simulation = d3.forceSimulation();
 
-		// const forceX = d3.forceX().x(width/2);
-		// const forceY = d3.forceY().y(height/2);
-		// const forceCollide = d3.forceCollide().radius(7);
+		const forceX = d3.forceX().x(width/2);
+		const forceY = d3.forceY().y(height/2);
+		const forceCollide = d3.forceCollide().radius(8);
 
-		// simulation
-		// 	.force('x', forceX)
-		// 	.force('collide', forceCollide)
-		// 	.force('center', d3.forceCenter(width / 2, height / 2))
-		// 	.force('charge', d3.forceManyBody().strength(5))
-		// 	// .force('link', forceLink)
-		// 	.nodes(data) //start the simulation
-		// 	.on('tick', () => {
-		// 		nodes.merge(nodesEnter)
-		// 			.attr('transform', d => `translate(${xScale(d.ranking)} , ${yScale(d.popularity)})`);
-		// 	})
-		// 	.alpha(1);
+		simulation
+			.force('x', forceX)
+			.force('y', forceY)
+			.force('collide', forceCollide)
+			// .force('center', d3.forceCenter(width / 2.2, height/2.2))
+			.force('charge', d3.forceManyBody().strength(5))
+			// .force('link', forceLink)
+			.nodes(data) //start the simulation
+			.on('tick', () => {
+				nodes.merge(nodesEnter)
+					.attr('transform', d => `translate(${d.x}, ${d.y})`);
+			})
+			.alpha(1);
 
+		
 
 }
 
@@ -236,7 +218,7 @@ function parseTrack(d){
 	return {
 		year: +d.Year,
 		artists_id: d.artists_id,
-		artist_display: d.artists_display,
+		artist: d.artists,
 		track_name: d.track_name,
 		follower: +d.follower,
 		genre: d.genre,

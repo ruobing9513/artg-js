@@ -2,6 +2,8 @@ const audioPromise = d3.csv('trackinfo.csv', parseAudio)
     // .then(data => new Map(data));
 const artistPromise = d3.csv('artist.csv', parseArtist);
 
+// const featurePromise = d3.csv('trackinfo.csv',parseFeature);
+
 Promise.all([
         audioPromise,
         artistPromise,
@@ -20,15 +22,12 @@ Promise.all([
 
         const musicAugmented = trackinfo.map(d => {
 
-            const artist_id = artistMap.get(d.artists_id);
+            // const artist_id = artistMap.get(d.artists_id);
             const artist_image = artistMap.get(d.artist_image);
             const artist_followers_total = artistMap.get(d.followers_total);
             const artists_popularity = artistMap.get(d.artists_popularity);
             const artist_genre = artistMap.get(d.genres);
 
-            if (artist_id){
-                d.artists_id = artist_id
-            }
             if (artist_image){
                 d.artists_image = artist_image
             }
@@ -49,6 +48,22 @@ Promise.all([
         console.log(musicAugmented);
 
         feature(musicAugmented);
+
+        const featureData = d3.nest()
+            .key(d => d.track_id)
+            .entries(musicAugmented)
+            .map(f=>{
+                return{
+                    track:f.key,
+                    features: f.values.forEach(g=>{
+                        danceability: features.danceability
+                    })
+
+                }
+            });
+
+
+        console.log(featureData);
 
     })
 
@@ -125,7 +140,7 @@ Promise.all([
             .duration(1500)
             .attr('r',4)
             .attr('fill-opacity',1)
-            .style('fill', d=>colorScale(d.energy));
+            .style('fill', d=>colorScale(d.acousticness));
 
         nodes.merge(nodesEnter)
             .on("click", function(d){
@@ -140,7 +155,7 @@ Promise.all([
                       .style('opacity',1)
                 tooltip
                     // TRACK IMAGE AND RANKING DOESNT MATCH WITH THE TRACK AND ARTIST 
-                      .html("<h2>" + d.artist + ' - ' + d.track_name + "</h2>" + "<br/>" + "<img src='"+d.artist_url+"'/>" 
+                      .html("<h2>" + d.artists_display + ' - ' + d.track_name + "</h2>" + "<br/>" + "<img src='"+d.artist_url+"'/>" 
                         + "<br/>" + 'Danceability: ' + d.danceability 
                         + "<br/>" + 'Energy: ' + d.energy 
                         + "<br/>" + 'Speechiness: ' + d.speechiness
@@ -173,9 +188,8 @@ function parseAudio(d){
     return {                                                   
         year: +d.Year,
         artists_id: d.artists_id,
-        artist: d.artists,
+        artists_display: d.artists_display,
         track_name: d.track_name,
-        follower: +d.follower,
         genre: d.genre,
         artist_url: d.artist_image,
         popularity: +d.popularity,
@@ -185,13 +199,10 @@ function parseAudio(d){
         ranking: +d.ranking,
         danceability: +d.danceability,
         energy: +d.energy,
-        loudness: +d.loudness,
         speechiness: +d.speechiness,
         acousticness: +d.acousticness,
-        instrumentalness: +d.instrumentalness,
         liveness: +d.liveness,
         valence: +d.valence,
-        tempo: +d.tempo,
         Preview: d.Preview_url,
         track_image: d.track_image,
     }

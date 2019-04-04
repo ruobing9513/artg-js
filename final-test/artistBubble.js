@@ -50,7 +50,7 @@ Promise.all([
 
 	function bubbleChart(data, rootDOM){
 
-			const margin = {top: 60, right: 60, bottom: 60, left: 60},
+			const margin = {top: 20, right: 20, bottom: 20, left: 20},
 			    width = 960 - margin.left - margin.right,
 			    height = 700 - margin.top - margin.bottom;
 
@@ -138,7 +138,7 @@ Promise.all([
 			const simulation = d3.forceSimulation();
 
 			// const forceX = d3.forceX().x(width/3);
-			// const forceY = d3.forceY().y(height/2);
+			const forceY = d3.forceY().y(height/2);
 			const forceCollide = d3.forceCollide().radius(d=>d.appearance*3.2);
 
 			simulation
@@ -146,7 +146,7 @@ Promise.all([
 				// .force('y', forceY)
 				.force('collide', forceCollide)
 				.force('center', d3.forceCenter(width / 2.2, height/2.2))
-				.force('charge', d3.forceManyBody().strength(5))
+				.force('charge', d3.forceManyBody().strength(7))
 				// .force('link', forceLink)
 				.nodes(data) //start the simulation
 				.on('tick', () => {
