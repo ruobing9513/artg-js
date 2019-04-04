@@ -48,178 +48,152 @@ Promise.all([
         });
         console.log(musicAugmented);
 
-        const audioData = d3.nest()
-            .key(d => d.track_name)
-            .entries(musicAugmented)
-            .map(group=>{
-                return {
-                    key: group.key,
-                    values: group.values
-                }
-            });
-        
-        console.log(audioData);
-
-        const menu = d3.select(".nav")
-            .append("select");
-
-        menu.selectAll("option")
-            .data(audioData)
-            .enter()
-            .append("option")
-            .attr("value", d => d.key)
-            .html(d=> d.key);
-
-        menu.on("change", function(){
-
-            const audio = this.value;
-
-            const data = transform(audio,audioData); //WHAT DOES IT MEAN 
-
-            feature(data);
-
-         })
-
-        const charts = d3.select('.plot-1')
-            .enter()
-            .data(audioData)
-            .attr('class','chart');
-
-            // .append('div')
-            // .attr('class','plot-1')
-
-        const chartsEnter = charts.enter()
-            .append('div')
-            .attr('class','chart')
-            .data(audioData);
-
-        charts.exit().remove();
-
-        charts.merge(chartsEnter)
-            .each(function(d){
-                feature(
-                    d.values,
-                    this,
-                    d.key
-                    )
-            });
-
+        feature(musicAugmented);
 
     })
 
-const feature = function(audioFeature) {
-    
-    // Define dimensions of vis
-    const margin = { top: 30, right: 50, bottom: 30, left: 50 },
-        width  = 550 - margin.left - margin.right,
-        height = 250 - margin.top  - margin.bottom;
+    function feature(data, rootDOM){
 
-    // Make x scale 
-    // Make y scale, the domain will be defined on bar update
-    const xScale = d3.scaleLinear().range([0, width]).domain([0,100]).rangeRoundBands([0, width], 0.1);;
-    const yScale = d3.scaleLinear().range([height, 0]).domain([0,130]);
-    // Create canvas
-    const plot3 = d3.select(".plot-3")
-      .append("svg")
-        .attr("width",  width  + margin.left + margin.right)
-        .attr("height", height + margin.top  + margin.bottom)
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        //data
+        //[{}, {}, {}...]x9
+        const margin = {top: 20, right: 20, bottom: 20, left: 20},
+            width = 900 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
 
-    // Make x-axis and add to canvas
-    const xAxis = plot1.append("g")
-       .attr('transform', 'translate(0,' + height + ')') 
-       .attr("class", "xAxis")
-       .call(d3.axisBottom()
-        .ticks(10)
-        // .tickSize(-width)
-        .scale(xScale));
+        const xScale = d3.scaleLinear().range([40, width+50]).domain([0,105]);
+        const yScale = d3.scaleLinear().range([height, 20]).domain([2009,2018]);
 
-    // Add the Y Axis
-    const yAxis = plot1.append("g")
-       .attr("class", "y axis")
-       .call(d3.axisLeft().scale(yScale));
+        //UPDATE SELECTION 
+        const plot3 = d3.select('.plot-3')
+            .append('svg')
+            .attr('width', width + 300)
+            .attr('height', height + 100)
+            .attr("transform","translate(" + margin.left + "," + margin.top + ")")
 
-    plot3.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+        const xAxis = plot3.append("g")
+           .attr('transform', 'translate(0,' + height + ')') 
+           .attr("class", "xAxis")
+           .call(d3.axisBottom()
+            .ticks(10)
+            // .tickSize(-width)
+            .scale(xScale));
 
-    const yAxisHandleForUpdate = plot3.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
+        // Add the Y Axis
+        const yAxis = plot3.append("g")
+            .attr("class", "yAxis")
+            .attr('transform', 'translate(40,0)')
+            .call(d3.axisLeft().scale(yScale));
 
-    yAxisHandleForUpdate.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("Value");
+        const tooltip  = d3.select('.plot-3').append("div")
+            .attr("class", "tooltip_feature")
+            .attr('width', 80)
+            .style("opacity", 0);
 
-    const updateBars = function(data) {
-        // First update the y-axis domain to match data
-        yScale.domain( d3.extent(data) );
-        yAxisHandleForUpdate.call(yAxis);
+        const colorScale = d3.scaleLinear()
+            .domain([0,1])
+            .range(['#FFFACD',"#DC143C"]);
 
-        const bars = plot3.selectAll(".bar").data(data);
+        //UPDATE SELECTION
+        const nodes = plot3.selectAll('.plot-3')
+            .data(data);
 
-        // Add bars for new data
-        bars.enter()
-          .append("rect")
-            .attr("class", "bar")
-            .attr("x", function(d,i) { return xScale( nutritionFields[i] ); })
-            .attr("width", xScale.rangeBand())
-            .attr("y", function(d,i) { return yScale(d); })
-            .attr("height", function(d,i) { return height - yScale(d); });
+        nodes.select('circle')
+            .style('fill','black')
+            .attr('r',5)
 
-        // Update old ones, already have x / width from before
-        bars
-            .transition().duration(250)
-            .attr("y", function(d,i) { return yScale(d); })
-            .attr("height", function(d,i) { return height - yScale(d); });
+        //ENTER SELECTION 
+        const nodesEnter = nodes.enter()
+            .append('g')
+            .attr('class', 'node')
 
-        // Remove old ones
-        bars.exit().remove();
-    };
+        nodesEnter.append('circle')
+            // .attr('transform', d => `translate(${xScale(d.ranking)} , ${yScale(d.popularity)})`)
+            .attr('r',1)
+            .attr('fill-opacity', 1)
+            .style('fill','black')
+            
 
-    // Handler for dropdown value change
-    var dropdownChange = function() {
-        var newCereal = d3.select(this).property('value'),
-            newData   = cerealMap[newCereal];
+        //ENTER AND UPDATE SELECTION, MERGE 
+        nodes.merge(nodesEnter)
+            .transition()
+            .attr('transform', d => `translate(${xScale(d.ranking)} , ${yScale(d.year)})`);
 
-        updateBars(newData);
-    };
+        nodes.merge(nodesEnter)
+            .select('circle')
 
-    // Get names of cereals, for dropdown
-    var cereals = Object.keys(cerealMap).sort();
+            .transition()
+            .duration(1500)
+            .attr('r',4)
+            .attr('fill-opacity',1)
+            .style('fill', d=>colorScale(d.energy));
 
-    var dropdown = d3.select("#vis-container")
-        .insert("select", "svg")
-        .on("change", dropdownChange);
+        nodes.merge(nodesEnter)
+            .on("click", function(d){
+                d3.select(this)
+                .style('fill','red')
+                .attr('r',10)
+                .attr('fill-opacity', 1)
+                // .style('stroke-width',2);
+                
+                tooltip.transition()
+                      .duration(200)
+                      .style('opacity',1)
+                tooltip
+                    // TRACK IMAGE AND RANKING DOESNT MATCH WITH THE TRACK AND ARTIST 
+                      .html("<h2>" + d.artist + ' - ' + d.track_name + "</h2>" + "<br/>" + "<img src='"+d.artist_url+"'/>" 
+                        + "<br/>" + 'Danceability: ' + d.danceability 
+                        + "<br/>" + 'Energy: ' + d.energy 
+                        + "<br/>" + 'Speechiness: ' + d.speechiness
+                        + "<br/>" + 'Valence: ' + d.valence
+                        + "<br/>" + 'Acousticness: ' + d.acousticness
+                        + "<br/>" + 'Liveness: ' + d.liveness
+                        + "<br/>" + "<audio controls>" + "<source src=" + "'" +d.Preview+ "'" + " type=" + "'audio/mpeg'>");
+            })
 
-    dropdown.selectAll("option")
-        .data(cereals)
-      .enter().append("option")
-        .attr("value", function (d) { return d; })
-        .text(function (d) {
-            return d[0].toUpperCase() + d.slice(1,d.length); // capitalize 1st letter
-        });
+            // .on("mouseout", function(d){
+            //     d3.select(this)
+            //     .attr('r', 10)
+            //     .attr('fill','black')
+            //     .attr('fill-opacity', 1);
+            //     // .style('stroke-width',1);
 
-    var initialData = cerealMap[ cereals[0] ];
-    updateBars(initialData);
-};
+            //     tooltip.transition()
+            //          .duration(500)
+            //          .style("opacity", 0);
+            // });
+
+
+        //EXIT SELECTION 
+        nodes.exit().remove()
+
+
+    }
 
 function parseAudio(d){
     return {                                                   
+        year: +d.Year,
+        artists_id: d.artists_id,
         artist: d.artists,
         track_name: d.track_name,
+        follower: +d.follower,
+        genre: d.genre,
+        artist_url: d.artist_image,
+        popularity: +d.popularity,
+        year: +d.year,
+        album: d.Album,
         track_id: d.track_id,
+        ranking: +d.ranking,
         danceability: +d.danceability,
         energy: +d.energy,
+        loudness: +d.loudness,
         speechiness: +d.speechiness,
         acousticness: +d.acousticness,
+        instrumentalness: +d.instrumentalness,
         liveness: +d.liveness,
         valence: +d.valence,
+        tempo: +d.tempo,
+        Preview: d.Preview_url,
+        track_image: d.track_image,
     }
 }
 

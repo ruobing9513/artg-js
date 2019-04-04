@@ -3,21 +3,56 @@
 	<head>
 		<meta charset='utf-8'>
 		<link href="https://fonts.googleapis.com/css?family=Lato|Bree+Serif" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<style>
 			h1{
+				font-family: sans-serif;
+			}
+			h2{
 				font-family: 'Bree Serif', serif;
 			}
 			body{
 				font-family: 'Lato', sans-serif;
 			}
 			img{
-			  width: 150px;
-			  height: 150px;
+			  	width: 150px;
+			  	height: 150px;
+			}
+			.node_image{
+				border-radius: 20%;
+				height: 30px;
+				width: 30px;
+				background-color: black;
+				fill-opacity: .4;
+
 			}
 			.tooltip{
-				margin-left: 900px;
+				margin-left: 1100px;
 				margin-top: -28%;
 				position: absolute;
+				border-radius: 5px;
+				border-width: 1px;
+				padding: 15px;
+				width: 400px;
+				height: 300px;
+				font-size: 14px;
+				font-weight: bold;
+			}
+			.tooltip_bubble{
+				margin-left: 100px;
+				margin-top: -28%;
+				position: absolute;
+				border-radius: 5px;
+				border-width: 1px;
+				padding: 15px;
+				width: 400px;
+				height: 300px;
+				font-size: 14px;
+				font-weight: bold;
+			}
+			.tooltip_feature{
+				margin-left: 950px;
+				margin-top: -40%;
 				border-radius: 5px;
 				border-width: 1px;
 				padding: 15px;
@@ -45,12 +80,16 @@
 			<div class="nav" style='margin-left: 100px'></div>
 			<div class="plot-container"></div>
 			<div class="plot-1"></div>
-			<div class="plot-2"></div>
-			<div class="plot-3"></div>
+			<div class="plot-2" align="center"></div>
+			<div class="plot-3">
+<!-- 				<p>dancability MAX 
+					<a href="https://p.scdn.co/mp3-preview/2780356e9a11fab474e2bc11758e41ab309f60d6?cid=774b29d4f13844c495f206cafdad9c86"><i class="fa fa-play-circle" style="font-size:24px;color:gold" target="_blank"></i></a></p>
+				<p>dancability MIN</p> -->
+			</div>
 		</div>
 		<script src='lib/d3/d3.min.js'></script>
-		<script src='./script.js'></script>
+		<!-- <script src='./script.js'></script> -->
 		<!-- <script src='./audioFeature.js'></script> -->
-		<!-- <script src="./artistBubble.js"></script> -->
+		<script src="./artistBubble.js"></script>
 	</body>
 </html>
