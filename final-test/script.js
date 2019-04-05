@@ -109,7 +109,7 @@ function scatterPlot(data, rootDOM){
 		    height = 400 - margin.top - margin.bottom;
 
 		const xScale = d3.scaleLinear().range([10, width+150]).domain([0,100]);
-		const yScale = d3.scaleLinear().range([height, 0]).domain([0,150]);
+		const yScale = d3.scaleLinear().range([height, 0]).domain([20,110]);
 
 		//UPDATE SELECTION 
 		const plot1 = d3.select('.plot-1')
@@ -144,12 +144,12 @@ function scatterPlot(data, rootDOM){
 			.append('g')
 			.attr('class', 'node')
 
-		nodesEnter.append('circle')
-			// .attr('transform', d => `translate(${xScale(d.ranking)} , ${yScale(d.popularity)})`)
-			// .style('fill', 'red')
-			.attr("r", 1)
-			.style('stroke-width',1)
-			.style('stroke','black');
+		// nodesEnter.append('circle')
+		// 	// .attr('transform', d => `translate(${xScale(d.ranking)} , ${yScale(d.popularity)})`)
+		// 	// .style('fill', 'red')
+		// 	.attr("r", 1)
+		// 	.style('stroke-width',1)
+		// 	.style('stroke','black');
 
 		nodesEnter.append('image')
 			.attr('class', 'node_image')
@@ -169,13 +169,13 @@ function scatterPlot(data, rootDOM){
 
 			.transition()
 			.duration(2000)
-			.attr('r',7);
+			.attr('r',10);
 
 		nodes.merge(nodesEnter)
 			.on("mouseenter", function(d){
 				d3.select(this)
 				.style('fill','#FF6347')
-				.attr('r',7)
+				.attr('r',10)
 				.attr('fill-opacity', .8)
 				
 			    tooltip.transition()
@@ -184,13 +184,13 @@ function scatterPlot(data, rootDOM){
 			    tooltip
 			    	//TRACK IMAGE AND RANKING DOESNT MATCH WITH THE TRACK AND ARTIST 
 			          .html("<h1>" + "Rank: " + d.ranking + "</h1>" 
-			          	+d.track_name + " - " + d.artists_display + "<br/>" 
+			          	+d.track_name + " - " + d.artist_display + "<br/>" 
 			          	+ "<br/>" + "<img src='"+d.track_image+"'/>"); 
 			})
 
 			.on("mouseout", function(d){
 				d3.select(this)
-				.attr('r', 7)
+				.attr('r', 10)
 				.style('fill','black')
 				.attr('fill-opacity', 1);
 				// .style('stroke-width',1);

@@ -32,13 +32,13 @@ Promise.all([
 
 		const artistsData = d3.nest()
 			.key(d => d.artist_data)
-			// .key(d => d.popularity)
-			// .key(d => d.values.length)
+			// .key(d => d.genre)
 			.entries(musicAugmented)
-			.map(group => {
+			.map(d => {
 				return {
-					artist: group.key, //converting into numbers
-					appearance: group.values.length,
+					artist: d.key, 
+					appearance: d.values.length,
+					values: d.values
 
 				}
 			});

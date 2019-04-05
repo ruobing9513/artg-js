@@ -109,7 +109,7 @@ function scatterPlot(data, rootDOM){
 		    height = 400 - margin.top - margin.bottom;
 
 		const xScale = d3.scaleLinear().range([10, width+150]).domain([0,100]);
-		const yScale = d3.scaleLinear().range([height, 0]).domain([0,150]);
+		const yScale = d3.scaleLinear().range([height, 0]).domain([20,110]);
 
 		data.forEach(d=>{
 			d.x = xScale(d.ranking);
@@ -194,7 +194,7 @@ function scatterPlot(data, rootDOM){
 		const forceCollide = d3.forceCollide().radius(8);
 
 		simulation
-			.force('x', forceX)
+			// .force('x', forceX)
 			.force('y', forceY)
 			.force('collide', forceCollide)
 			// .force('center', d3.forceCenter(width / 2.2, height/2.2))

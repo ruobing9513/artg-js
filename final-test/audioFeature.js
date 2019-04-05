@@ -55,13 +55,12 @@ Promise.all([
             .map(f=>{
                 return{
                     track:f.key,
-                    features: f.values.forEach(g=>{
-                        danceability: features.danceability
-                    })
-
+                    features: f.values
                 }
             });
 
+
+        console.log(featureNew);
 
         console.log(featureData);
 
@@ -73,7 +72,7 @@ Promise.all([
         //[{}, {}, {}...]x9
         const margin = {top: 20, right: 20, bottom: 20, left: 20},
             width = 900 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
+            height = 400 - margin.top - margin.bottom;
 
         const xScale = d3.scaleLinear().range([40, width+50]).domain([0,105]);
         const yScale = d3.scaleLinear().range([height, 20]).domain([2009,2018]);
@@ -155,7 +154,7 @@ Promise.all([
                       .style('opacity',1)
                 tooltip
                     // TRACK IMAGE AND RANKING DOESNT MATCH WITH THE TRACK AND ARTIST 
-                      .html("<h2>" + d.artists_display + ' - ' + d.track_name + "</h2>" + "<br/>" + "<img src='"+d.artist_url+"'/>" 
+                      .html("<h2>" + d.artists_display + "<br/>" + d.track_name + "</h2>" + "<br/>" + "<img src='"+d.artist_url+"'/>" 
                         + "<br/>" + 'Danceability: ' + d.danceability 
                         + "<br/>" + 'Energy: ' + d.energy 
                         + "<br/>" + 'Speechiness: ' + d.speechiness
